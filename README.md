@@ -14,6 +14,8 @@ But at the very first begining, let me upload the executable file first, I will 
 for some personal reasons(some guys always make me annoying to comment some rubbish on my works, even worse, she/he stole my work to claim that she/he has a better solution!). So, I have to delay releasing my source 
     code.
 
+Notice: I removed lines that are used to fix the issue due to my personal reasons see below.
+
 Since, I am too busy these days to finish assignments and 3 midterms this months, I may update my Github slow,
 but I can assure you that great things will happen, and when they happen… they will happen here.
 
