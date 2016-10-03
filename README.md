@@ -31,4 +31,5 @@ Change Log
 2016-10-2
 
 - Initial Commit
-- Tested successfully on Dell Precision M3800. More improvements will be added soon!
+- Tested successfully on Dell Precision M3800. More improvements will be added soon
+- Battery percentage routine comes into IOPowerManagement
