@@ -6,7 +6,7 @@
 	<string>com.syscl.iopm</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>pm</string>
+		<string>IOPowerManagement</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
