@@ -24,7 +24,22 @@ So now, let's turn to my work: IOPowerManagement.
 How to use IOPowerManagement?
 ----------------
 
-Will come soon in this months!
+For kext version, just place it under /Library/Extensions or /System/Library/Extensions by typing:
+```sh
+sudo cp -RX ./IOPowerDeploy.kext /Library/Extensions
+```
+or 
+```sh
+sudo cp -RX ./IOPowerDeploy.kext /System/Library/Extensions
+```
+Then load kext by typing:
+```sh
+sudo kextload /Library/Extensions/IOPowerDeploy.kext
+```
+or
+```sh
+sudo kextload /System/Library/Extensions/IOPowerDeploy.kext
+```
 
 Change Log
 ----------------
