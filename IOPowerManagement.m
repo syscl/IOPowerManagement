@@ -19,7 +19,9 @@
 #include <IOKit/pwr_mgt/IOPM.h>
 #import <IOKit/ps/IOPowerSources.h>
 
+//
 // syscl::Power keys
+//
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/ps/IOPowerSources.h>
 #include <IOKit/ps/IOPSKeys.h>
@@ -42,18 +44,61 @@ int main(int argc, char **argv)
     unsigned int kIOPMEvents[] = { kAESleep, kAEShutDown, kAERestart, kAEReallyLogOut };
     const char **poperatorIOPM = operatorIOPM;
     unsigned int *pkIOPMEvents = kIOPMEvents;
+    unsigned int *kPMEventPass;
     OSStatus ret               = noErr;
     
     //
     // release from infinite loop to prevent rescourse exhausted
     //
-    if (argc >= 2)
+    if (argc >= 3)
     {
         releaseLock = true;
+    }
+    else if (argc == 1)
+    {
+        //
+        // use default
+        //
+        printf("Computer is waiting to %s\n", "sleep");
+        *kPMEventPass = kIOPMEvents[0];
     }
     else
     {
         releaseLock = false;
+    }
+    
+    
+    while (--argc > 0 && (*++argv)[0] == '-')
+    {
+        char *pargv = ++argv[0];
+        for (unsigned long i = 0; i < sizeof(operatorIOPM)/sizeof(operatorIOPM[0]); ++i)
+        {
+            if (strcmp(pargv, *poperatorIOPM) == 0)
+            {
+                //
+                // sending IOPMEvent to system
+                //
+                kPMEventPass = pkIOPMEvents;
+                // ret = TransportEventSystemCall(*pkIOPMEvents);
+                printf("Computer is waiting to %s\n", *poperatorIOPM);
+                /*
+                if (ret == noErr)
+                {
+                    printf("Computer is going to %s.\n", *poperatorIOPM);
+                }
+                else
+                {
+                    printf("Computer wouldn't %s.\n", *poperatorIOPM);
+                }
+                 */
+                break;
+            }
+            else
+            {
+                ++poperatorIOPM;
+                ++pkIOPMEvents;
+            }
+        }
     }
     
     while (!releaseLock)
@@ -79,39 +124,12 @@ int main(int argc, char **argv)
             // Signal system to sleep/hibernation
             //
             // To-Do: hibernation method define by users or gain configuration from users' config
-            ret = TransportEventSystemCall(kAESleep);
+            // now it can be used to support arguments
+            ret = TransportEventSystemCall(*kPMEventPass);
             sleep(hookIntervalSleep);
         }
     }
     
-    while (--argc > 0 && (*++argv)[0] == '-')
-    {
-        char *pargv = ++argv[0];
-        for (unsigned long i = 0; i < sizeof(operatorIOPM)/sizeof(operatorIOPM[0]); ++i)
-        {
-            if (strcmp(pargv, *poperatorIOPM) == 0)
-            {
-                //
-                // sending IOPMEvent to system
-                //
-                ret = TransportEventSystemCall(*pkIOPMEvents);
-                if (ret == noErr)
-                {
-                    printf("Computer is going to %s.\n", *poperatorIOPM);
-                }
-                else
-                {
-                    printf("Computer wouldn't %s.\n", *poperatorIOPM);
-                }
-                break;
-            }
-            else
-            {
-                ++poperatorIOPM;
-                ++pkIOPMEvents;
-            }
-        }
-    }
     printf("Usage:\n");
     printf("-shutdown:   halt system\n");
     printf("-sleep:      sleep system\n");

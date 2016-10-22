@@ -21,7 +21,7 @@ unsigned int hookIntervalSleep = 150;  // seconds unit, must be 30 * n (n = 1, 2
 int timeRemaining_seconds;
 int batPercentage;                    // for int compare, elimante %
 int lowBatPercentage           = 6;   // system default percentage
-bool releaseLock     = false;
+bool releaseLock               = false;
 //
 // Ohter variables that use to output
 //
