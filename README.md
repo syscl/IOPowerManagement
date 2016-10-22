@@ -1,9 +1,9 @@
 Fix low battery sleep/hibernation do not work issue for OS X/macOS for laptops
 ============
 
-Well, as hackintosh laptops have a very known issue on OS X/macOS. That is, system cannot correctly
-put system into sleep/hibernation when the battery level is lower than 5%. Once the battery is drained 
-out, the system will halt instantly and cause data lose. So, I started this project with objective-c 
+Well, as macOS/OS X has a very known issue that is, system cannot correctly
+put itself into sleep/hibernation/shutdown when the battery level is lower than critical state. Once the battery is drained 
+out, the system will halt instantly and cause data lose. So, I started this project with Objective-C 
 to provide a better sleep mode for both Macbook and hackintosh laptops. This method is better than Apple's original low
 battery policy, I will explain this later. 
 
@@ -20,7 +20,7 @@ So now, let's turn to my work: IOPowerManagement.
 How to use IOPowerManagement?
 ----------------
 
-For objective-c version(recommanded now):
+For Objective-C version(recommanded now):
 
 Download the latest version installation package/directory by entering the following command in a terminal window:
 ```sh
@@ -45,6 +45,7 @@ sudo launchctl load /Library/LaunchDaemons/com.syscl.iopm.plist
 Reboot to enjoy your macOS/OS X :)
 
 
+
 For kext version, just place it under /Library/Extensions or /System/Library/Extensions by typing:
 ```sh
 sudo cp -RX ./IOPowerDeploy.kext /Library/Extensions
@@ -64,6 +65,11 @@ sudo kextload /System/Library/Extensions/IOPowerDeploy.kext
 
 Change Log
 ----------------
+2016-10-22
+
+- Released source code
+- Optimised source code
+
 2016-10-2
 
 - Initial Commit
