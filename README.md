@@ -69,6 +69,8 @@ Change Log
 
 - Released source code
 - Optimised source code
+- You can config IOPowerManagement through com.syscl.iopm instead of recompile it. Actually, I tend to like compile version, since config 
+- will reduce the speed of the program.
 
 2016-10-2
 
