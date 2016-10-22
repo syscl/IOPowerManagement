@@ -10,19 +10,40 @@ battery policy, I will explain this later.
 And also, as it's name, it will provide more powerful/flexible power management functions/policies as you like to control
 the system.
 
-But at the very first beginning, let me upload the executable file first, I will upload source code later
-for some personal reasons(some guys always make me annoying to comment some rubbish on my works, even worse, she/he stole my work to claim that she/he has a better solution!). So, I have to delay releasing my source 
-    code.
+Notice: Kext version still need to be refined due to my intention. I want to make this project in a more general situation.
 
-Notice: I removed lines that are used to fix the issue due to my personal reasons I just said.
-
-Since, I am too busy these days to finish assignments and 3 midterms this months, I may update my Github slow,
+Since, I am too busy these days to finish assignments and my final exams will come soon, I may update my Github slow,
 but I can assure you that great things will happen, and when they happen… they will happen here.
 
 So now, let's turn to my work: IOPowerManagement.
 
 How to use IOPowerManagement?
 ----------------
+
+For objective-c version(recommanded now):
+
+Download the latest version installation package/directory by entering the following command in a terminal window:
+```sh
+git clone https://github.com/syscl/IOPowerManagement
+```
+
+Build the project by typing:
+```sh
+cd IOPowerManagement/
+clang IOPowerManagement.m -fobjc-arc -fmodules -mmacosx-version-min=10.6 -o IOPowerManagement
+```
+Then place com.syscl.iopm.plist in /Library/LaunchDaemons/ by typing:
+```sh
+sudo cp -RX ./com.syscl.iopm.plist /Library/LaunchDaemons/
+```
+
+Installing both program and service for macOS by typing:
+```sh
+sudo cp -RX ./IOPowerManagement /etc
+sudo launchctl load /Library/LaunchDaemons/com.syscl.iopm.plist 
+```
+Reboot to enjoy your macOS/OS X :)
+
 
 For kext version, just place it under /Library/Extensions or /System/Library/Extensions by typing:
 ```sh
