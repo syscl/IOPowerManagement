@@ -16,7 +16,6 @@
 // define main variables
 //
 const int bufferSize           = 256;
-OSStatus ret                   = noErr;
 unsigned int hookIntervalTime  = 30;   // seconds unit;
 unsigned int hookIntervalSleep = 150;  // seconds unit, must be 30 * n (n = 1, 2, ... )
 int timeRemaining_seconds;

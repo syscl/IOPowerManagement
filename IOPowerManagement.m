@@ -42,6 +42,7 @@ int main(int argc, char **argv)
     unsigned int kIOPMEvents[] = { kAESleep, kAEShutDown, kAERestart, kAEReallyLogOut };
     const char **poperatorIOPM = operatorIOPM;
     unsigned int *pkIOPMEvents = kIOPMEvents;
+    OSStatus ret               = noErr;
     
     //
     // release from infinite loop to prevent rescourse exhausted
