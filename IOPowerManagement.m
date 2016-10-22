@@ -27,7 +27,7 @@
 //
 // syscl::header file
 //
-#include "powerman.h"
+#include "IOPowerManagement.h"
 
 //
 // syscl::method to be defined
