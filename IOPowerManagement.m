@@ -59,7 +59,7 @@ int main(int argc, char **argv)
         //
         // use default
         //
-        printf("Computer is waiting to %s\n", "sleep");
+        printf("Computer is waiting to %s\n", *poperatorIOPM);
         *kPMEventPass = kIOPMEvents[0];
     }
     else
@@ -79,18 +79,7 @@ int main(int argc, char **argv)
                 // sending IOPMEvent to system
                 //
                 kPMEventPass = pkIOPMEvents;
-                // ret = TransportEventSystemCall(*pkIOPMEvents);
                 printf("Computer is waiting to %s\n", *poperatorIOPM);
-                /*
-                if (ret == noErr)
-                {
-                    printf("Computer is going to %s.\n", *poperatorIOPM);
-                }
-                else
-                {
-                    printf("Computer wouldn't %s.\n", *poperatorIOPM);
-                }
-                 */
                 break;
             }
             else
@@ -123,9 +112,15 @@ int main(int argc, char **argv)
             //
             // Signal system to sleep/hibernation
             //
-            // To-Do: hibernation method define by users or gain configuration from users' config
-            // now it can be used to support arguments
             ret = TransportEventSystemCall(*kPMEventPass);
+            if (ret == noErr)
+            {
+                printf("Computer is going to %s.\n", *poperatorIOPM);
+            }
+            else
+            {
+                printf("Computer wouldn't %s.\n", *poperatorIOPM);
+            }
             sleep(hookIntervalSleep);
         }
     }
