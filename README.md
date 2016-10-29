@@ -65,6 +65,25 @@ sudo kextload /System/Library/Extensions/IOPowerDeploy.kext
 
 Change Log
 ----------------
+2016-10-28
+
+- Added prevent sleep case, now the project performs more reasonable:
+- If battery is lower than the crucial value, say 6%, then IOPowerManagement(IOPM) notify the system 
+- to sleep/hibernation/shutdown/restart. But at this moment, users do not want to sleep the system, they may
+- have mission still have to complete and they have confidence that the battery life can last that
+- long, so, they simpley move their mouse/keyboard to wake the system from sleep that IOPM just sent
+- This time, IOPM will record the time stamp, and prepare for the next sleep, if user again move their
+- mouse/keyboard to wake the system up, then the project will consider users do not want a sleep at this time
+- so, IOPM will stop to issue the sleep event.
+- Seems fairly simply right? But the logic is not that easy. Difficuties that I face and finally solve during
+- this progress is:
+- I never shut my laptop, and if IOPM sleep notification has been blocked/prevent, I still want this program persit monitoring once my battery percentage lower than 6%, what should this program behave? Should it 
+- return? 
+- How to storage those time? Which form is more efficient and easier to manage?
+- The key point to detect if user prevent the sleep?
+- ...
+- All the above answers has included in 2016-10-28's update, please see the changes. :) 
+
 2016-10-22
 
 - Released source code

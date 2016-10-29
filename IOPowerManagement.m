@@ -36,6 +36,8 @@
 //
 static OSStatus TransportEventSystemCall(AEEventID EventToSend);
 int getBatteryPercentage(void);
+void timeprint(LinkEntry *);
+LinkEntry *addtmstamp(void);
 
 
 int main(int argc, char **argv)
@@ -46,6 +48,7 @@ int main(int argc, char **argv)
     unsigned int *pkIOPMEvents = kIOPMEvents;
     unsigned int *kPMEventPass;
     OSStatus ret               = noErr;
+    unsigned long timeslic     = 0;
     
     //
     // release from infinite loop to prevent rescourse exhausted
@@ -92,6 +95,7 @@ int main(int argc, char **argv)
     
     while (!releaseLock)
     {
+        // curr = addtmstamp();
         timeRemaining_seconds = IOPSGetTimeRemainingEstimate();
         batPercentage         = getBatteryPercentage();
         if ((timeRemaining_seconds > timeToSleep_seconds || timeRemaining_seconds <= 0) && batPercentage >= lowBatPercentage)
@@ -112,17 +116,38 @@ int main(int argc, char **argv)
             //
             // Signal system to sleep/hibernation
             //
-            ret = TransportEventSystemCall(*kPMEventPass);
-            if (ret == noErr)
+            if (cntNotify == 0)
             {
-                printf("Computer is going to %s.\n", *poperatorIOPM);
+                curr = addtmstamp();
             }
             else
             {
-                printf("Computer wouldn't %s.\n", *poperatorIOPM);
+                addtmstamp();
             }
+            
+            cntNotify++;
+            
+            if (tail != head)
+            {
+                timeslic = tail->ticks - tail->prev->ticks;
+            }
+            
+            if (timeslic > PREVENT_SLEEP_SLIC)  // no "=" included, for a more flexible/weak situation
+            {
+                ret = TransportEventSystemCall(*kPMEventPass);
+                if (ret == noErr)
+                {
+                    printf("Computer is going to %s.\n", *poperatorIOPM);
+                }
+                else
+                {
+                    printf("Computer wouldn't %s.\n", *poperatorIOPM);
+                }
+            }
+            
             sleep(hookIntervalSleep);
         }
+        // timeprint(head);
     }
     
     printf("Usage:\n");
@@ -212,4 +237,99 @@ int getBatteryPercentage(void)
         batteryPercentage = (int)(((double)curCapacity/(double)maxCapacity) * 100);
     }
     return batteryPercentage;
+}
+
+//
+// Time management function
+//
+void timeprint(LinkEntry *time)
+{
+    if (isEmpty())
+        return;
+
+    if (tail->next == NULL)
+    {
+        //
+        // not a circle
+        //
+        if (time != NULL)
+        {
+            if (time->next != NULL)
+            {
+                timeprint(time->next);
+            }
+        }
+    }
+    else
+    {
+        if (time->next != curr)
+        {
+            timeprint(time->next);
+        }
+    }
+    printf("Time tick now is %lu\n", time->ticks);
+}
+
+LinkEntry *addtmstamp(void)
+{
+    if (isFull())
+    {
+        if (tail->next == NULL)
+        {
+            tail->next = head;
+            head->prev = tail;
+            curr       = head;
+        }
+        else
+        {
+            //
+            // is circle
+            //
+            curr = curr->next;
+        }
+    }
+    else
+    {
+        curr = malloc(sizeof(LinkEntry));
+        
+        if (head == NULL)
+        {
+            head = tail = curr;
+            curr->prev  = NULL;
+            curr->next  = NULL;
+        }
+        else
+        {
+            curr->next = NULL;
+            curr->prev = tail;
+            tail->next = curr;
+            tail       = curr;
+        }
+    }
+    //
+    // update ticks
+    //
+    curr->ticks = CFAbsoluteTimeGetCurrent();
+    cnt_add++;
+    
+    return curr;
+}
+
+bool isFull(void)
+{
+    return (cnt_add >= CLOCKSIZE);
+}
+
+bool isEmpty(void)
+{
+    return ((head == tail) && (cnt_add == 0));
+}
+
+unsigned int size(void)
+{
+    if (head == NULL)
+    {
+        return 0;
+    }
+    return (tail - head + 1);
 }
