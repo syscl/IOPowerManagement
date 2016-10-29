@@ -129,7 +129,7 @@ int main(int argc, char **argv)
             
             if (tail != head)
             {
-                timeslic = tail->ticks - tail->prev->ticks;
+                timeslic = curr->ticks - curr->prev->ticks;
             }
             
             if (timeslic > PREVENT_SLEEP_SLIC)  // no "=" included, for a more flexible/weak situation
