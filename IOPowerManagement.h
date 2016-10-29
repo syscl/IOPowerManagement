@@ -48,7 +48,7 @@ typedef struct LE {
 //
 bool isFull(void);
 bool isEmpty(void);
-unsigned int size(void);
+unsigned int size(LinkEntry *);
 
 //
 // constructor

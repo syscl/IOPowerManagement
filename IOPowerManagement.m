@@ -318,11 +318,11 @@ bool isEmpty(void)
     return ((head == tail) && (cnt_add == 0));
 }
 
-unsigned int size(void)
+unsigned int size(LinkEntry *tmp)
 {
-    if (head == NULL)
+    if (tmp == NULL)
     {
         return 0;
     }
-    return (tail - head + 1);
+    return (1 + size(tmp->next));
 }
