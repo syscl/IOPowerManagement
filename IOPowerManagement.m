@@ -116,14 +116,7 @@ int main(int argc, char **argv)
             //
             // Signal system to sleep/hibernation
             //
-            if (cntNotify == 0)
-            {
-                curr = addtmstamp();
-            }
-            else
-            {
-                addtmstamp();
-            }
+            addtmstamp();
             
             cntNotify++;
             
