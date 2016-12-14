@@ -3,7 +3,7 @@
 //  IOPowerManagement
 //
 //  Created by lighting on 10/2/16.
-//  Copyright © 2016 syscl. All rights reserved.
+//  Copyright ? 2016 syscl. All rights reserved.
 //
 // This work is licensed under the Creative Commons Attribution-NonCommercial
 // 4.0 Unported License => http://creativecommons.org/licenses/by-nc/4.0
@@ -36,8 +36,98 @@
 //
 static OSStatus TransportEventSystemCall(AEEventID EventToSend);
 int getBatteryPercentage(void);
-void timeprint(LinkEntry *);
-LinkEntry *addtmstamp(void);
+
+
+typedef struct
+{
+    int fixedSize;
+    int length;
+    int begin;
+    int end;
+    unsigned long *queue;
+} FixedQueueUlong;
+
+FixedQueueUlong *FixedQueueUlong_new(int ln)
+{
+    FixedQueueUlong *obj = malloc(sizeof(FixedQueueUlong));
+    obj->queue = malloc(ln * sizeof(unsigned long));
+    obj->fixedSize = ln;
+    obj->length = 0;
+    obj->begin = 0;
+    obj->end = 0;
+    
+    return obj;
+}
+
+void FixedQueueUlong_delete(FixedQueueUlong *obj)
+{
+    free(obj->queue);
+    free(obj);
+}
+
+void FixedQueueUlong_enqueue(FixedQueueUlong *obj, unsigned long cnt)
+{
+    if (obj->length >= obj->fixedSize)
+    {
+        return;
+    }
+    
+    obj->queue[obj->end] = cnt;
+    obj->end = (obj->end + 1) % obj->fixedSize;
+    obj->length += 1;
+}
+
+void FixedQueueUlong_forceEnqueue(FixedQueueUlong *obj, unsigned long cnt)
+{
+    if (obj->length < obj->fixedSize)
+    {
+        FixedQueueUlong_enqueue(obj, cnt);
+        return;
+    }
+    
+    obj->begin = (obj->begin + 1) % obj->fixedSize;
+    obj->queue[obj->end] = cnt;
+    obj->end = (obj->end + 1) % obj->fixedSize;
+}
+
+unsigned long FixedQueueUlong_dequeue(FixedQueueUlong *obj)
+{
+    if (obj->length <= 0)
+    {
+        return 0;
+    }
+    
+    unsigned long r = obj->queue[obj->begin];
+    obj->begin = (obj->begin + 1) % obj->fixedSize;
+    obj->length -= 1;
+    
+    return r;
+}
+
+unsigned long FixedQueueUlong_get(FixedQueueUlong *obj, int i)
+{
+    if (i < 0)
+    {
+        i = obj->length + i;
+    }
+    if (i >= obj->length)
+    {
+        return 0;
+    }
+    
+    int ri = (obj->begin + i) % obj->fixedSize;
+    return obj->queue[ri];
+}
+
+void FixedQueueUlong_printAll(FixedQueueUlong *obj)
+{
+    for (int i = 0; i < obj->length; i += 1)
+    {
+        int j = (obj->begin + i) % obj->fixedSize;
+        printf("%lu, ", obj->queue[j]);
+    }
+    putchar('\n');
+}
 
 
 int main(int argc, char **argv)
@@ -49,6 +139,7 @@ int main(int argc, char **argv)
     unsigned int *kPMEventPass;
     OSStatus ret               = noErr;
     unsigned long timeslic     = 0;
+    FixedQueueUlong *queue     = FixedQueueUlong_new(CLOCKSIZE);
     
     //
     // release from infinite loop to prevent rescourse exhausted
@@ -95,7 +186,6 @@ int main(int argc, char **argv)
     
     while (!releaseLock)
     {
-        // curr = addtmstamp();
         timeRemaining_seconds = IOPSGetTimeRemainingEstimate();
         batPercentage         = getBatteryPercentage();
         if ((timeRemaining_seconds > timeToSleep_seconds || timeRemaining_seconds <= 0) && batPercentage >= lowBatPercentage)
@@ -116,14 +206,16 @@ int main(int argc, char **argv)
             //
             // Signal system to sleep/hibernation
             //
-            addtmstamp();
+            
+            //altered 20161214
+            FixedQueueUlong_forceEnqueue(queue, CFAbsoluteTimeGetCurrent());
+            puts("queue contents: \n");
+            FixedQueueUlong_printAll(queue);
             
             cntNotify++;
             
-            if (tail != head)
-            {
-                timeslic = curr->ticks - curr->prev->ticks;
-            }
+            //altered 20161214
+            timeslic = FixedQueueUlong_get(queue, -1) - FixedQueueUlong_get(queue, -2);
             
             if (timeslic > PREVENT_SLEEP_SLIC)  // no "=" included, for a more flexible/weak situation
             {
@@ -140,7 +232,6 @@ int main(int argc, char **argv)
             
             sleep(hookIntervalSleep);
         }
-        // timeprint(head);
     }
     
     printf("Usage:\n");
@@ -148,7 +239,8 @@ int main(int argc, char **argv)
     printf("-sleep:      sleep system\n");
     printf("-logout:     logout system\n");
     printf("-restart:    restart system\n");
-
+    
+    FixedQueueUlong_delete(queue);
     return 0;
 }
        
@@ -230,99 +322,4 @@ int getBatteryPercentage(void)
         batteryPercentage = (int)(((double)curCapacity/(double)maxCapacity) * 100);
     }
     return batteryPercentage;
-}
-
-//
-// Time management function
-//
-void timeprint(LinkEntry *time)
-{
-    if (isEmpty())
-        return;
-
-    if (tail->next == NULL)
-    {
-        //
-        // not a circle
-        //
-        if (time != NULL)
-        {
-            if (time->next != NULL)
-            {
-                timeprint(time->next);
-            }
-        }
-    }
-    else
-    {
-        if (time->next != curr)
-        {
-            timeprint(time->next);
-        }
-    }
-    printf("Time tick now is %lu\n", time->ticks);
-}
-
-LinkEntry *addtmstamp(void)
-{
-    if (isFull())
-    {
-        if (tail->next == NULL)
-        {
-            tail->next = head;
-            head->prev = tail;
-            curr       = head;
-        }
-        else
-        {
-            //
-            // is circle
-            //
-            curr = curr->next;
-        }
-    }
-    else
-    {
-        curr = malloc(sizeof(LinkEntry));
-        
-        if (head == NULL)
-        {
-            head = tail = curr;
-            curr->prev  = NULL;
-            curr->next  = NULL;
-        }
-        else
-        {
-            curr->next = NULL;
-            curr->prev = tail;
-            tail->next = curr;
-            tail       = curr;
-        }
-    }
-    //
-    // update ticks
-    //
-    curr->ticks = CFAbsoluteTimeGetCurrent();
-    cnt_add++;
-    
-    return curr;
-}
-
-bool isFull(void)
-{
-    return (cnt_add >= CLOCKSIZE);
-}
-
-bool isEmpty(void)
-{
-    return ((head == tail) && (cnt_add == 0));
-}
-
-unsigned int size(LinkEntry *tmp)
-{
-    if (tmp == NULL)
-    {
-        return 0;
-    }
-    return (1 + size(tmp->next));
 }
