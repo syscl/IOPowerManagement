@@ -34,28 +34,6 @@ int timeToSleep_minutes = 10;  // minutes unit
 // numbers of IOPowerManagement notifys
 //
 const unsigned long PREVENT_SLEEP_SLIC = 120;   // seconds unit
-unsigned long cnt_add                  = 0;
 const unsigned int CLOCKSIZE           = 12;              // 1, 2, ..., 12
-
-typedef struct LE {
-    unsigned long ticks;
-    struct LE *prev;
-    struct LE *next;
-} LinkEntry;
-
-//
-// declare public methods
-//
-bool isFull(void);
-bool isEmpty(void);
-unsigned int size(LinkEntry *);
-
-//
-// constructor
-//
-LinkEntry *head = NULL;
-LinkEntry *tail = NULL;
-LinkEntry *curr = NULL;
-
 
 int cntNotify = 0; // count numbers of Notify it send
