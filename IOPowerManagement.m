@@ -3,7 +3,7 @@
 //  IOPowerManagement
 //
 //  Created by lighting on 10/2/16.
-//  Copyright © 2016 syscl. All rights reserved.
+//  Copyright ? 2016 syscl. All rights reserved.
 //
 // This work is licensed under the Creative Commons Attribution-NonCommercial
 // 4.0 Unported License => http://creativecommons.org/licenses/by-nc/4.0
@@ -40,6 +40,86 @@ void timeprint(LinkEntry *);
 LinkEntry *addtmstamp(void);
 
 
+typedef struct
+{
+    int fixedSize;
+    int length;
+    int begin;
+    int end;
+    unsigned long *queue;
+} FixedQueueUlong;
+
+FixedQueueUlong *FixedQueueUlong_new(int ln)
+{
+    FixedQueueUlong *obj = malloc(sizeof(FixedQueueUlong));
+    obj->queue = malloc(ln * sizeof(unsigned long));
+    obj->fixedSize = ln;
+    obj->length = 0;
+    obj->begin = 0;
+    obj->end = 0;
+    
+    return obj;
+}
+
+void FixedQueueUlong_delete(FixedQueueUlong *obj)
+{
+    free(obj->queue);
+    free(obj);
+}
+
+void FixedQueueUlong_enqueue(FixedQueueUlong *obj, unsigned long cnt)
+{
+    if (obj->length >= obj->fixedSize)
+    {
+        return;
+    }
+    
+    obj->queue[obj->end] = cnt;
+    obj->end = (obj->end + 1) % obj->fixedSize;
+    obj->length += 1;
+}
+
+void FixedQueueUlong_forceEnqueue(FixedQueueUlong *obj, unsigned long cnt)
+{
+    if (obj->length < obj->fixedSize)
+    {
+        FixedQueueUlong_enqueue(obj, cnt);
+        return;
+    }
+    
+    obj->begin = (obj->begin + 1) % obj->fixedSize;
+    obj->queue[obj->end] = cnt;
+    obj->end = (obj->end + 1) % obj->fixedSize;
+}
+
+unsigned long FixedQueueUlong_dequeue(FixedQueueUlong *obj)
+{
+    if (obj->length <= 0)
+    {
+        return 0;
+    }
+    
+    unsigned long r = obj->queue[obj->begin];
+    obj->begin = (obj->begin + 1) % obj->fixedSize;
+    obj->length -= 1;
+    
+    return r;
+}
+
+unsigned long FixedQueueUlong_get(FixedQueueUlong *obj, int i)
+{
+    int ri = (obj->begin + i) % obj->fixedSize;
+    if (ri >= obj->length)
+    {
+        return 0;
+    }
+    else 
+    {
+        return obj->queue[ri];
+    }
+}
+
+
 int main(int argc, char **argv)
 {
     const char *operatorIOPM[] = { "sleep", "shutdown", "restart", "logout" };
@@ -49,6 +129,7 @@ int main(int argc, char **argv)
     unsigned int *kPMEventPass;
     OSStatus ret               = noErr;
     unsigned long timeslic     = 0;
+    FixedQueueUlong *queue     = FixedQueueUlong_new(CLOCKSIZE);
     
     //
     // release from infinite loop to prevent rescourse exhausted
@@ -116,13 +197,17 @@ int main(int argc, char **argv)
             //
             // Signal system to sleep/hibernation
             //
-            addtmstamp();
+            
+            //altered 20161214
+            //addtmstamp();
+            FixedQueueUlong_forceEnqueue(queue, CFAbsoluteTimeGetCurrent());
             
             cntNotify++;
             
             if (tail != head)
             {
                 timeslic = curr->ticks - curr->prev->ticks;
+                timeslic = FixedQueueUlong_get(queue, 0) - FixedQueueUlong_get(queue, 1);
             }
             
             if (timeslic > PREVENT_SLEEP_SLIC)  // no "=" included, for a more flexible/weak situation
@@ -141,6 +226,8 @@ int main(int argc, char **argv)
             sleep(hookIntervalSleep);
         }
         // timeprint(head);
+        //altered 20161214
+        printf("Time tick now is %lu\n", FixedQueueUlong_get(queue, 0));
     }
     
     printf("Usage:\n");
@@ -148,7 +235,8 @@ int main(int argc, char **argv)
     printf("-sleep:      sleep system\n");
     printf("-logout:     logout system\n");
     printf("-restart:    restart system\n");
-
+    
+    FixedQueueUlong_delete(queue);
     return 0;
 }
        
