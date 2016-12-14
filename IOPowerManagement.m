@@ -118,10 +118,7 @@ unsigned long FixedQueueUlong_get(FixedQueueUlong *obj, int i)
     }
     
     int ri = (obj->begin + i) % obj->fixedSize;
-    else 
-    {
-        return obj->queue[ri];
-    }
+    return obj->queue[ri];
 }
 
 void FixedQueueUlong_printAll(FixedQueueUlong *obj)
@@ -216,6 +213,8 @@ int main(int argc, char **argv)
             //altered 20161214
             //addtmstamp();
             FixedQueueUlong_forceEnqueue(queue, CFAbsoluteTimeGetCurrent());
+            puts("queue contents: \n");
+            FixedQueueUlong_printAll(queue);
             
             cntNotify++;
             
@@ -243,9 +242,6 @@ int main(int argc, char **argv)
             sleep(hookIntervalSleep);
         }
         // timeprint(head);
-        //altered 20161214
-        puts("queue contents: \n");
-        FixedQueueUlong_printAll(queue);
     }
     
     printf("Usage:\n");
