@@ -1,5 +1,5 @@
 
-#include "FixedQueueUlong.c"
+#include "FixedQueueUlong.h"
 
 
 FixedQueueUlong *FixedQueueUlong_new(int ln)
