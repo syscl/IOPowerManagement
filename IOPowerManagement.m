@@ -108,15 +108,30 @@ unsigned long FixedQueueUlong_dequeue(FixedQueueUlong *obj)
 
 unsigned long FixedQueueUlong_get(FixedQueueUlong *obj, int i)
 {
-    int ri = (obj->begin + i) % obj->fixedSize;
-    if (ri >= obj->length)
+    if (i < 0)
+    {
+        i = obj->length + i;
+    }
+    if (i >= obj->length)
     {
         return 0;
     }
+    
+    int ri = (obj->begin + i) % obj->fixedSize;
     else 
     {
         return obj->queue[ri];
     }
+}
+
+void FixedQueueUlong_printAll(FixedQueueUlong *obj)
+{
+    for (int i = 0; i < obj->length; i += 1)
+    {
+        int j = (obj->begin + i) % obj->fixedSize;
+        printf("%lu, ", obj->queue[j]);
+    }
+    putchar('\n');
 }
 
 
@@ -204,11 +219,13 @@ int main(int argc, char **argv)
             
             cntNotify++;
             
-            if (tail != head)
+            //altered 20161214
+            /*if (tail != head)
             {
                 timeslic = curr->ticks - curr->prev->ticks;
-                timeslic = FixedQueueUlong_get(queue, 0) - FixedQueueUlong_get(queue, 1);
-            }
+
+            }*/
+            timeslic = FixedQueueUlong_get(queue, -1) - FixedQueueUlong_get(queue, -2);
             
             if (timeslic > PREVENT_SLEEP_SLIC)  // no "=" included, for a more flexible/weak situation
             {
@@ -227,7 +244,8 @@ int main(int argc, char **argv)
         }
         // timeprint(head);
         //altered 20161214
-        printf("Time tick now is %lu\n", FixedQueueUlong_get(queue, 0));
+        puts("queue contents: \n");
+        FixedQueueUlong_printAll(queue);
     }
     
     printf("Usage:\n");
