@@ -33,7 +33,7 @@ git clone https://github.com/syscl/IOPowerManagement
 Build the project by typing:
 ```sh
 cd IOPowerManagement/
-clang IOPowerManagement.m -fobjc-arc -fmodules -mmacosx-version-min=10.6 -o IOPowerManagement
+clang IOPowerManagement.m FixedQueueUlong.m -fobjc-arc -fmodules -mmacosx-version-min=10.6 -o IOPowerManagement
 ```
 Then place com.syscl.iopm.plist in /Library/LaunchDaemons/ by typing:
 ```sh
@@ -68,6 +68,10 @@ sudo kextload /System/Library/Extensions/IOPowerDeploy.kext
 
 Change Log
 ----------------
+2016-12-14
+
+- Merge code from @schdt899 credit @schdt899
+
 2016-10-28
 
 - Added prevent sleep case, now the project performs more reasonable:
